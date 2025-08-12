@@ -7,6 +7,7 @@ import ResistanceComponent from "./ResistanceComponent";
 import DCPowerSupplyComponent from "./DCPowerSupplyComponent";
 import CapacitorComponent from "./CapacitorComponent";
 import InductorComponent from "./InductorComponent";
+import LineComponent from "./LineComponent";
 
 export default function StageComponent() {
   const [resistanceCounter, setResistanceCounter] = useState(0);
@@ -29,6 +30,7 @@ export default function StageComponent() {
       setDcPowerSupplies(prevDcPowerSupplies => prevDcPowerSupplies.filter((dcPowerSupply) => !selectedIds.includes(dcPowerSupply.id())));
       setCapacitors(prevCapacitors => prevCapacitors.filter((capacitor) => !selectedIds.includes(capacitor.id())));
       setInductors(prevInductors => prevInductors.filter((inductor) => !selectedIds.includes(inductor.id())));
+      setLines(prevLines => prevLines.filter((line) => !selectedIds.includes(line.id())));
       setSelectedIds([]);
     }
   }, [selectedIds]);
@@ -43,42 +45,42 @@ export default function StageComponent() {
   }, [handleKeyDown]);
 
   // 初期データの設定は別のuseEffectに分離
-  useEffect(() => {
-    const resistance = new Konva.Rect({
-      x: 100 + 35, // 中心座標に調整（x + width/2）
-      y: 100 + 15, // 中心座標に調整（y + height/2）
-      width: 70,
-      height: 25,
-      fill: "red",
-      id: `resistance${resistanceCounter}`,
-      rotation: 0, // 回転角度を初期化
-    });
-    setResistances([resistance]);
+  // useEffect(() => {
+  //   const resistance = new Konva.Rect({
+  //     x: 100 + 35, // 中心座標に調整（x + width/2）
+  //     y: 100 + 15, // 中心座標に調整（y + height/2）
+  //     width: 70,
+  //     height: 25,
+  //     fill: "red",
+  //     id: `resistance${resistanceCounter}`,
+  //     rotation: 0, // 回転角度を初期化
+  //   });
+  //   setResistances([resistance]);
 
-    const line = new Konva.Line({
-      points: [100, 100, 200, 100],
-      stroke: "black",
-      strokeWidth: 2,
-      id: "line1",
-    });
-    setLines([line]);
+  //   const line = new Konva.Line({
+  //     points: [100, 100, 200, 100],
+  //     stroke: "black",
+  //     strokeWidth: 2,
+  //     id: "line1",
+  //   });
+  //   setLines([line]);
 
-    const dcPowerSupply = new Konva.Group({
-      x: 100,
-      y: 100,
-      width: 60,
-      height: 60,
-      rotation: 0,
-      id: `dcPowerSupply${dcPowerSupplyCounter}`,
-    });
-    setDcPowerSupplies([...dcPowerSupplies, dcPowerSupply]);
-    setDcPowerSupplyCounter(dcPowerSupplyCounter + 1);
-  }, []);
+  //   const dcPowerSupply = new Konva.Group({
+  //     x: 100,
+  //     y: 100,
+  //     width: 60,
+  //     height: 60,
+  //     rotation: 0,
+  //     id: `dcPowerSupply${dcPowerSupplyCounter}`,
+  //   });
+  //   setDcPowerSupplies([...dcPowerSupplies, dcPowerSupply]);
+  //   setDcPowerSupplyCounter(dcPowerSupplyCounter + 1);
+  // }, []);
 
   const addResistance = () => {
     const resistance = new Konva.Rect({
-      x: 100 + 35, // 中心座標に調整（x + width/2）
-      y: 100 + resistanceCounter + 15, // 中心座標に調整（y + height/2）
+      x: 100 + resistanceCounter * 10, // 重ならないように少しずらす
+      y: 100 + resistanceCounter * 10, // 中心座標に調整（y + height/2）
       width: 70,
       height: 25,  
       id: `resistance${resistanceCounter + 1}`,
@@ -89,11 +91,21 @@ export default function StageComponent() {
   }
 
   const addLine = () => {
+    const startX = 100 + lines.length * 10;
+    const startY = 100 + lines.length * 10;
+    const endX = startX + 100;
+    const endY = startY;
+    
+    // 中心座標を計算
+    const centerX = (startX + endX) / 2;
+    const centerY = (startY + endY) / 2;
+    
     const line = new Konva.Line({
-      points: [100, 100, 200, 200],
-      stroke: "black",
-      strokeWidth: 2,
+      points: [startX, startY, endX, endY],
       id: `line${lines.length + 1}`,
+      x: centerX,
+      y: centerY,
+      rotation: 0,
     });
     setLines([...lines, line]);
   }
@@ -160,7 +172,7 @@ export default function StageComponent() {
 
   const rotateSelectedElement = () => {
     if (selectedIds.length === 1) {
-      const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors];
+      const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors, ...lines];
       const selectedElement = allElements.find((element) => element.id() === selectedIds[0]);
       if (selectedElement) {
         selectedElement.rotation(selectedElement.rotation() + 45);
@@ -169,6 +181,7 @@ export default function StageComponent() {
         setDcPowerSupplies([...dcPowerSupplies]);
         setCapacitors([...capacitors]);
         setInductors([...inductors]);
+        setLines([...lines]);
       }
     }
   }
@@ -183,7 +196,7 @@ export default function StageComponent() {
     const draggedElement = event.target;
     
     // 全ての要素配列を統合して、ドラッグされた要素を見つける
-    const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors];
+    const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors, ...lines];
     const draggedElementData = allElements.find((element) => element.id() === id);
     
     if (!draggedElementData) return;
@@ -212,6 +225,7 @@ export default function StageComponent() {
     setDcPowerSupplies([...dcPowerSupplies]);
     setCapacitors([...capacitors]);
     setInductors([...inductors]);
+    setLines([...lines]);
   }
 
   return (
@@ -223,7 +237,7 @@ export default function StageComponent() {
         <button onClick={addCapacitor}>Add Capacitor</button>
         <button onClick={addInductor}>Add Inductor</button>
         <button onClick={rotateSelectedElement}>Rotate Selected</button>
-        {resistances.map((resistance) => (
+        {/* {resistances.map((resistance) => (
           <div key={resistance.id()}>
             {resistance.id()}
           </div>
@@ -232,7 +246,7 @@ export default function StageComponent() {
         <p>selectedIds: {selectedIds.length}</p>
         {selectedIds.map((id) => (
           <div key={id}>{id}</div>
-        ))}
+        ))} */}
       </div>
       <div style={{ position: 'relative' }}>
         <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleStageClick}>
@@ -247,8 +261,15 @@ export default function StageComponent() {
                 onDragMove={handleElementDragMove}
               />
             ))}
-            {lines.map((line, index) => (
-              <Line key={index} points={line.points()} stroke="black" strokeWidth={2} draggable={true} zIndex={1} className="cursor-pointer" /> 
+            {lines.map((line) => (
+              <LineComponent
+                key={line.id()}
+                line={line}
+                isSelected={selectedIds.includes(line.id())}
+                onLineClick={handleClick}
+                onDragStart={handleDragStart}
+                onDragMove={handleElementDragMove}
+              />
             ))}
             {dcPowerSupplies.map((dcPowerSupply) => (
               <DCPowerSupplyComponent 
@@ -285,33 +306,55 @@ export default function StageComponent() {
         
         {/* 選択された要素が1つの場合に回転ボタンを表示 */}
         {selectedIds.length === 1 && (() => {
-          const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors];
+          const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors, ...lines];
           const selectedElement = allElements.find((element) => element.id() === selectedIds[0]);
           if (selectedElement) {
-            // 要素のサイズを取得（Rect用のwidth/heightまたはGroup用のgetClientRect）
-            const elementWidth = selectedElement.width ? selectedElement.width() : selectedElement.getClientRect().width;
-            const elementHeight = selectedElement.height ? selectedElement.height() : selectedElement.getClientRect().height;
+            // 要素のサイズを取得（Rect用のwidth/heightまたはGroup用のgetClientRect、Line用の特別処理）
+            let elementWidth, elementHeight, elementX, elementY;
             
-            return (
-              <button
-                onClick={rotateSelectedElement}
-                style={{
-                  position: 'absolute',
-                  left: selectedElement.x() + elementWidth / 2 + 10, // 中心基準での右端に調整
-                  top: selectedElement.y() - elementHeight / 2 - 10, // 中心基準での上端に調整
-                  backgroundColor: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  zIndex: 1000,
-                }}
-              >
-                ↻ 45°
-              </button>
-            );
+            if (selectedElement.width) {
+              // Rect要素の場合
+              elementWidth = selectedElement.width();
+              elementHeight = selectedElement.height();
+              elementX = selectedElement.x();
+              elementY = selectedElement.y();
+            } else if (selectedElement.getClientRect) {
+              // Group要素の場合
+              const rect = selectedElement.getClientRect();
+              elementWidth = rect.width;
+              elementHeight = rect.height;
+              elementX = selectedElement.x();
+              elementY = selectedElement.y();
+            } else {
+              // Line要素の場合は中心座標を使用
+              const lineElement = selectedElement as Konva.Line;
+              const points = lineElement.points();
+              elementWidth = Math.abs(points[2] - points[0]);
+              elementHeight = Math.abs(points[3] - points[1]);
+              elementX = selectedElement.x(); // 既に中心座標
+              elementY = selectedElement.y(); // 既に中心座標
+            }
+            
+              return (
+                <button
+                  onClick={rotateSelectedElement}
+                  style={{
+                    position: 'absolute',
+                    left: elementX + elementWidth / 2 + 10, // 中心基準での右端に調整
+                    top: elementY - elementHeight / 2 - 10, // 中心基準での上端に調整
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    zIndex: 1000,
+                  }}
+                >
+                  ↻ 45°
+                </button>
+              );
           }
           return null;
         })()}
