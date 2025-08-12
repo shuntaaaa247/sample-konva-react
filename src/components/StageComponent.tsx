@@ -1,8 +1,9 @@
 'use client'
 
 import Konva from "konva";
-import { Stage, Layer, Rect, Line } from "react-konva";
+import { Stage, Layer, Line } from "react-konva";
 import { useEffect, useState, useCallback } from "react";
+import RectComponent from "./RectComponent";
 
 export default function StageComponent() {
   const [rectCounter, setRectCounter] = useState(0);
@@ -160,23 +161,13 @@ export default function StageComponent() {
         <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleStageClick}>
           <Layer>
             {rects.map((rect, index) => (
-              // <RectComponent key={index} />
-              <Rect 
+              <RectComponent 
                 key={rect.id()} 
-                x={Number(rect.x())} 
-                y={Number(rect.y())} 
-                width={Number(rect.width())} 
-                height={Number(rect.height())} 
-                rotation={Number(rect.rotation())} 
-                offsetX={Number(rect.width()) / 2}
-                offsetY={Number(rect.height()) / 2}
-                stroke={selectedIds.includes(rect.id()) ? "red" : "black"} 
-                strokeWidth={2} 
-                draggable={true} fill={"white"} 
-                id={rect.id()} 
-                onClick={(event) => handleRectClick(rect.id(), event)} 
-                onDragStart={(event) => handleDragStart(rect.id(), event)}
-                onDragMove={(event) => handleRectDragMove(rect.id(), event)}
+                rect={rect} 
+                isSelected={selectedIds.includes(rect.id())} 
+                onRectClick={handleRectClick} 
+                onDragStart={handleDragStart}
+                onDragMove={handleRectDragMove}
               />
             ))}
             {lines.map((line, index) => (
