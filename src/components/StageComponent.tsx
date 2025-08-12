@@ -2,12 +2,21 @@
 
 import Konva from "konva";
 import { Stage, Layer, Line } from "react-konva";
-import { useEffect, useState, useCallback } from "react";
-import RectComponent from "./RectComponent";
+import { useEffect, useState, useCallback } from "react"; 
+import ResistanceComponent from "./ResistanceComponent";
+import DCPowerSupplyComponent from "./DCPowerSupplyComponent";
+import CapacitorComponent from "./CapacitorComponent";
+import InductorComponent from "./InductorComponent";
 
 export default function StageComponent() {
-  const [rectCounter, setRectCounter] = useState(0);
-  const [rects, setRects] = useState<Konva.Rect[]>([]);
+  const [resistanceCounter, setResistanceCounter] = useState(0);
+  const [dcPowerSupplyCounter, setDcPowerSupplyCounter] = useState(0);
+  const [capacitorCounter, setCapacitorCounter] = useState(0);
+  const [inductorCounter, setInductorCounter] = useState(0);
+  const [resistances, setResistances] = useState<Konva.Rect[]>([]);
+  const [dcPowerSupplies, setDcPowerSupplies] = useState<Konva.Group[]>([]);
+  const [capacitors, setCapacitors] = useState<Konva.Group[]>([]);
+  const [inductors, setInductors] = useState<Konva.Group[]>([]);
   const [lines, setLines] = useState<Konva.Line[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -15,7 +24,11 @@ export default function StageComponent() {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     console.log(e.key);
     if (e.key === "Backspace") {
-      setRects(prevRects => prevRects.filter((rect) => !selectedIds.includes(rect.id())));
+      // 選択された要素を各配列から削除
+      setResistances(prevResistances => prevResistances.filter((resistance) => !selectedIds.includes(resistance.id())));
+      setDcPowerSupplies(prevDcPowerSupplies => prevDcPowerSupplies.filter((dcPowerSupply) => !selectedIds.includes(dcPowerSupply.id())));
+      setCapacitors(prevCapacitors => prevCapacitors.filter((capacitor) => !selectedIds.includes(capacitor.id())));
+      setInductors(prevInductors => prevInductors.filter((inductor) => !selectedIds.includes(inductor.id())));
       setSelectedIds([]);
     }
   }, [selectedIds]);
@@ -31,16 +44,16 @@ export default function StageComponent() {
 
   // 初期データの設定は別のuseEffectに分離
   useEffect(() => {
-    const rect = new Konva.Rect({
+    const resistance = new Konva.Rect({
       x: 100 + 35, // 中心座標に調整（x + width/2）
       y: 100 + 15, // 中心座標に調整（y + height/2）
       width: 70,
-      height: 30,
+      height: 25,
       fill: "red",
-      id: `rect${rectCounter}`,
+      id: `resistance${resistanceCounter}`,
       rotation: 0, // 回転角度を初期化
     });
-    setRects([rect]);
+    setResistances([resistance]);
 
     const line = new Konva.Line({
       points: [100, 100, 200, 100],
@@ -49,19 +62,30 @@ export default function StageComponent() {
       id: "line1",
     });
     setLines([line]);
+
+    const dcPowerSupply = new Konva.Group({
+      x: 100,
+      y: 100,
+      width: 60,
+      height: 60,
+      rotation: 0,
+      id: `dcPowerSupply${dcPowerSupplyCounter}`,
+    });
+    setDcPowerSupplies([...dcPowerSupplies, dcPowerSupply]);
+    setDcPowerSupplyCounter(dcPowerSupplyCounter + 1);
   }, []);
 
-  const addRect = () => {
-    const rect = new Konva.Rect({
+  const addResistance = () => {
+    const resistance = new Konva.Rect({
       x: 100 + 35, // 中心座標に調整（x + width/2）
-      y: 100 + rectCounter + 15, // 中心座標に調整（y + height/2）
+      y: 100 + resistanceCounter + 15, // 中心座標に調整（y + height/2）
       width: 70,
-      height: 30,  
-      id: `rect${rectCounter + 1}`,
+      height: 25,  
+      id: `resistance${resistanceCounter + 1}`,
       rotation: 0, // 回転角度を初期化
     });
-    setRects([...rects, rect]);
-    setRectCounter(rectCounter + 1);
+    setResistances([...resistances, resistance]);
+    setResistanceCounter(resistanceCounter + 1);
   }
 
   const addLine = () => {
@@ -74,7 +98,46 @@ export default function StageComponent() {
     setLines([...lines, line]);
   }
 
-  const handleRectClick = (id: string, event: Konva.KonvaEventObject<MouseEvent>) => {
+  const addDCPowerSupply = () => {
+    const dcPowerSupply = new Konva.Group({
+      x: 150 + dcPowerSupplyCounter * 10, // 重ならないように少しずらす
+      y: 150 + dcPowerSupplyCounter * 10,
+      width: 60,
+      height: 60,
+      rotation: 0,
+      id: `dcPowerSupply${dcPowerSupplyCounter + 1}`,
+    });
+    setDcPowerSupplies([...dcPowerSupplies, dcPowerSupply]);
+    setDcPowerSupplyCounter(dcPowerSupplyCounter + 1);
+  }
+
+  const addCapacitor = () => {
+    const capacitor = new Konva.Group({
+      x: 200 + capacitorCounter * 10, // 重ならないように少しずらす
+      y: 200 + capacitorCounter * 10,
+      width: 60,
+      height: 60,
+      rotation: 0,
+      id: `capacitor${capacitorCounter + 1}`,
+    });
+    setCapacitors([...capacitors, capacitor]);
+    setCapacitorCounter(capacitorCounter + 1);
+  }
+
+  const addInductor = () => {
+    const inductor = new Konva.Group({
+      x: 250 + inductorCounter * 10, // 重ならないように少しずらす
+      y: 250 + inductorCounter * 10,
+      width: 86.4, // 20%拡大: 72 * 1.2
+      height: 72,  // 20%拡大: 60 * 1.2
+      rotation: 0,
+      id: `inductor${inductorCounter + 1}`,
+    });
+    setInductors([...inductors, inductor]);
+    setInductorCounter(inductorCounter + 1);
+  }
+
+  const handleClick = (id: string, event: Konva.KonvaEventObject<MouseEvent>) => {
     // ただクリックした場合は選択状態の要素をクリックされた要素のみにする
     setSelectedIds([id]);
 
@@ -95,12 +158,17 @@ export default function StageComponent() {
     }
   }
 
-  const rotateSelectedRect = () => {
+  const rotateSelectedElement = () => {
     if (selectedIds.length === 1) {
-      const selectedRect = rects.find((rect) => rect.id() === selectedIds[0]);
-      if (selectedRect) {
-        selectedRect.rotation(selectedRect.rotation() + 45);
-        setRects([...rects]);
+      const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors];
+      const selectedElement = allElements.find((element) => element.id() === selectedIds[0]);
+      if (selectedElement) {
+        selectedElement.rotation(selectedElement.rotation() + 45);
+        // 各要素タイプの状態を更新
+        setResistances([...resistances]);
+        setDcPowerSupplies([...dcPowerSupplies]);
+        setCapacitors([...capacitors]);
+        setInductors([...inductors]);
       }
     }
   }
@@ -111,44 +179,53 @@ export default function StageComponent() {
     }
   }
 
-  const handleRectDragMove = (id: string, event: Konva.KonvaEventObject<MouseEvent>) => {
-    const draggedRect = event.target;
-    const draggedRectData = rects.find((rect) => rect.id() === id);
+  const handleElementDragMove = (id: string, event: Konva.KonvaEventObject<MouseEvent>) => {
+    const draggedElement = event.target;
     
-    if (!draggedRectData) return;
+    // 全ての要素配列を統合して、ドラッグされた要素を見つける
+    const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors];
+    const draggedElementData = allElements.find((element) => element.id() === id);
+    
+    if (!draggedElementData) return;
 
-    // ドラッグした矩形の移動量を計算
-    const deltaX = draggedRect.x() - draggedRectData.x();
-    const deltaY = draggedRect.y() - draggedRectData.y();
+    // ドラッグした要素の移動量を計算
+    const deltaX = draggedElement.x() - draggedElementData.x();
+    const deltaY = draggedElement.y() - draggedElementData.y();
 
-    // 選択されている矩形（ドラッグした矩形を含まない）をすべて同じ量だけ移動
-    const rectsToMove = selectedIds.includes(id) ? 
-      rects.filter((rect) => selectedIds.includes(rect.id()) && rect.id() !== id) :
+    // 選択されている要素（ドラッグした要素を含まない）をすべて同じ量だけ移動
+    const elementsToMove = selectedIds.includes(id) ? 
+      allElements.filter((element) => selectedIds.includes(element.id()) && element.id() !== id) :
       [];
 
-    // ドラッグした矩形のデータを更新
-    draggedRectData.x(draggedRect.x());
-    draggedRectData.y(draggedRect.y());
+    // ドラッグした要素のデータを更新
+    draggedElementData.x(draggedElement.x());
+    draggedElementData.y(draggedElement.y());
 
-    // 他の選択された矩形も同じ量だけ移動
-    rectsToMove.forEach((rect) => {
-      rect.x(rect.x() + deltaX);
-      rect.y(rect.y() + deltaY);
+    // 他の選択された要素も同じ量だけ移動
+    elementsToMove.forEach((element) => {
+      element.x(element.x() + deltaX);
+      element.y(element.y() + deltaY);
     });
 
-    // 状態を更新
-    setRects([...rects]);
+    // 各要素タイプの状態を更新
+    setResistances([...resistances]);
+    setDcPowerSupplies([...dcPowerSupplies]);
+    setCapacitors([...capacitors]);
+    setInductors([...inductors]);
   }
 
   return (
     <div>
       <div className="flex flex-col bg-gray-200 p-2 w-[10%]">
-        <button onClick={addRect}>Add Rect</button>
+        <button onClick={addResistance}>Add Resistance</button>
         <button onClick={addLine}>Add Line</button>
-        <button onClick={rotateSelectedRect}>Rotate Selected</button>
-        {rects.map((rect) => (
-          <div key={rect.id()}>
-            {rect.id()}
+        <button onClick={addDCPowerSupply}>Add DC Power Supply</button>
+        <button onClick={addCapacitor}>Add Capacitor</button>
+        <button onClick={addInductor}>Add Inductor</button>
+        <button onClick={rotateSelectedElement}>Rotate Selected</button>
+        {resistances.map((resistance) => (
+          <div key={resistance.id()}>
+            {resistance.id()}
           </div>
         ))}
 
@@ -160,33 +237,68 @@ export default function StageComponent() {
       <div style={{ position: 'relative' }}>
         <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleStageClick}>
           <Layer>
-            {rects.map((rect, index) => (
-              <RectComponent 
-                key={rect.id()} 
-                rect={rect} 
-                isSelected={selectedIds.includes(rect.id())} 
-                onRectClick={handleRectClick} 
+            {resistances.map((resistance, index) => (
+              <ResistanceComponent 
+                key={resistance.id()} 
+                rect={resistance} 
+                isSelected={selectedIds.includes(resistance.id())} 
+                onResistanceClick={handleClick} 
                 onDragStart={handleDragStart}
-                onDragMove={handleRectDragMove}
+                onDragMove={handleElementDragMove}
               />
             ))}
             {lines.map((line, index) => (
               <Line key={index} points={line.points()} stroke="black" strokeWidth={2} draggable={true} zIndex={1} className="cursor-pointer" /> 
             ))}
+            {dcPowerSupplies.map((dcPowerSupply) => (
+              <DCPowerSupplyComponent 
+                key={dcPowerSupply.id()}
+                group={dcPowerSupply}
+                isSelected={selectedIds.includes(dcPowerSupply.id())}
+                onDragStart={handleDragStart}
+                onDragMove={handleElementDragMove}
+                onDCPowerSupplyClick={handleClick}
+              />
+            ))}
+            {capacitors.map((capacitor) => (
+              <CapacitorComponent
+                key={capacitor.id()}
+                group={capacitor}
+                isSelected={selectedIds.includes(capacitor.id())}
+                onDragStart={handleDragStart}
+                onDragMove={handleElementDragMove}
+                onCapacitorClick={handleClick}
+              />
+            ))}
+            {inductors.map((inductor) => (
+              <InductorComponent
+                key={inductor.id()}
+                group={inductor}
+                isSelected={selectedIds.includes(inductor.id())}
+                onDragStart={handleDragStart}
+                onDragMove={handleElementDragMove}
+                onInductorClick={handleClick}
+              />
+            ))}
           </Layer>
         </Stage>
         
-        {/* 選択されたRectが1つの場合に回転ボタンを表示 */}
+        {/* 選択された要素が1つの場合に回転ボタンを表示 */}
         {selectedIds.length === 1 && (() => {
-          const selectedRect = rects.find((rect) => rect.id() === selectedIds[0]);
-          if (selectedRect) {
+          const allElements = [...resistances, ...dcPowerSupplies, ...capacitors, ...inductors];
+          const selectedElement = allElements.find((element) => element.id() === selectedIds[0]);
+          if (selectedElement) {
+            // 要素のサイズを取得（Rect用のwidth/heightまたはGroup用のgetClientRect）
+            const elementWidth = selectedElement.width ? selectedElement.width() : selectedElement.getClientRect().width;
+            const elementHeight = selectedElement.height ? selectedElement.height() : selectedElement.getClientRect().height;
+            
             return (
               <button
-                onClick={rotateSelectedRect}
+                onClick={rotateSelectedElement}
                 style={{
                   position: 'absolute',
-                  left: selectedRect.x() + selectedRect.width() / 2 + 10, // 中心基準での右端に調整
-                  top: selectedRect.y() - selectedRect.height() / 2 - 10, // 中心基準での上端に調整
+                  left: selectedElement.x() + elementWidth / 2 + 10, // 中心基準での右端に調整
+                  top: selectedElement.y() - elementHeight / 2 - 10, // 中心基準での上端に調整
                   backgroundColor: '#3b82f6',
                   color: 'white',
                   border: 'none',
