@@ -1,15 +1,23 @@
 import Konva from "konva";
 import { Rect } from "react-konva";
 
-interface RectComponentProps {
+interface ResistanceComponentProps {
   rect: Konva.Rect;
   isSelected: boolean;
-  onRectClick: (id: string, event: Konva.KonvaEventObject<MouseEvent>) => void;
+  onResistanceClick: (id: string, event: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragStart: (id: string, event: Konva.KonvaEventObject<MouseEvent>) => void;
   onDragMove: (id: string, event: Konva.KonvaEventObject<MouseEvent>) => void;
 }
 
-export default function RectComponent({ rect, isSelected, onRectClick, onDragStart, onDragMove }: RectComponentProps) {
+export default function ResistanceComponent({ rect, isSelected, onResistanceClick, onDragStart, onDragMove }: ResistanceComponentProps) {
+  const handleMouseEnter = () => {
+    document.body.style.cursor = 'pointer';
+  };
+
+  const handleMouseLeave = () => {
+    document.body.style.cursor = 'default';
+  };
+
   return (
     <Rect 
       x={Number(rect.x())} 
@@ -24,9 +32,11 @@ export default function RectComponent({ rect, isSelected, onRectClick, onDragSta
       draggable={true} 
       fill={"white"} 
       id={rect.id()} 
-      onClick={(event) => onRectClick(rect.id(), event)} 
+      onClick={(event) => onResistanceClick(rect.id(), event)} 
       onDragStart={(event) => onDragStart(rect.id(), event)}
       onDragMove={(event) => onDragMove(rect.id(), event)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     />
   );
 } 
