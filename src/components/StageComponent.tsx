@@ -21,6 +21,8 @@ export default function StageComponent() {
   const [lines, setLines] = useState<Konva.Line[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  const [pointerPosition, setPointerPosition] = useState<{x: number, y: number}>({x: 0, y: 0});
+
   // キーを押した時の処理
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     console.log(e.key);
@@ -44,39 +46,6 @@ export default function StageComponent() {
     };
   }, [handleKeyDown]);
 
-  // 初期データの設定は別のuseEffectに分離
-  // useEffect(() => {
-  //   const resistance = new Konva.Rect({
-  //     x: 100 + 35, // 中心座標に調整（x + width/2）
-  //     y: 100 + 15, // 中心座標に調整（y + height/2）
-  //     width: 70,
-  //     height: 25,
-  //     fill: "red",
-  //     id: `resistance${resistanceCounter}`,
-  //     rotation: 0, // 回転角度を初期化
-  //   });
-  //   setResistances([resistance]);
-
-  //   const line = new Konva.Line({
-  //     points: [100, 100, 200, 100],
-  //     stroke: "black",
-  //     strokeWidth: 2,
-  //     id: "line1",
-  //   });
-  //   setLines([line]);
-
-  //   const dcPowerSupply = new Konva.Group({
-  //     x: 100,
-  //     y: 100,
-  //     width: 60,
-  //     height: 60,
-  //     rotation: 0,
-  //     id: `dcPowerSupply${dcPowerSupplyCounter}`,
-  //   });
-  //   setDcPowerSupplies([...dcPowerSupplies, dcPowerSupply]);
-  //   setDcPowerSupplyCounter(dcPowerSupplyCounter + 1);
-  // }, []);
-
   const addResistance = () => {
     const resistance = new Konva.Rect({
       x: 100 + resistanceCounter * 10, // 重ならないように少しずらす
@@ -91,20 +60,14 @@ export default function StageComponent() {
   }
 
   const addLine = () => {
-    const startX = 100 + lines.length * 10;
-    const startY = 100 + lines.length * 10;
-    const endX = startX + 100;
-    const endY = startY;
-    
-    // 中心座標を計算
-    const centerX = (startX + endX) / 2;
-    const centerY = (startY + endY) / 2;
+    const startPointX = 0 + lines.length * 100;
+    const startPointY = 100 + lines.length * 100;
+    const endPointX = startPointX + 100;
+    const endPointY = startPointY;
     
     const line = new Konva.Line({
-      points: [startX, startY, endX, endY],
+      points: [startPointX, startPointY, endPointX, endPointY],
       id: `line${lines.length + 1}`,
-      x: centerX,
-      y: centerY,
       rotation: 0,
     });
     setLines([...lines, line]);
@@ -150,6 +113,15 @@ export default function StageComponent() {
   }
 
   const handleClick = (id: string, event: Konva.KonvaEventObject<MouseEvent>) => {
+
+    console.log("x: " + event.target.x())
+    console.log("y: " + event.target.y())
+    console.log("width: " + event.target.width())
+    console.log("height: " + event.target.height())
+    console.log("rotation: " + event.target.rotation())
+    console.log("id: " + event.target.id())
+    console.log("points: " + (event.target instanceof Konva.Line ? event.target.points() : "Not Line"))
+
     // ただクリックした場合は選択状態の要素をクリックされた要素のみにする
     setSelectedIds([id]);
 
@@ -228,6 +200,15 @@ export default function StageComponent() {
     setLines([...lines]);
   }
 
+  const handleLineResize = (event: Konva.KonvaEventObject<MouseEvent>, id: string, newPoints?: number[]) => {
+    const line = lines.find((line) => line.id() === id);
+    setPointerPosition(event.target.getStage()?.getPointerPosition() || {x: 0, y: 0})
+    if (line) {
+      line.points(newPoints)
+      setLines([...lines]);
+    }
+  }
+
   return (
     <div>
       <div className="flex flex-col bg-gray-200 p-2 w-[10%]">
@@ -237,16 +218,14 @@ export default function StageComponent() {
         <button onClick={addCapacitor}>Add Capacitor</button>
         <button onClick={addInductor}>Add Inductor</button>
         <button onClick={rotateSelectedElement}>Rotate Selected</button>
-        {/* {resistances.map((resistance) => (
-          <div key={resistance.id()}>
-            {resistance.id()}
-          </div>
-        ))}
-
-        <p>selectedIds: {selectedIds.length}</p>
-        {selectedIds.map((id) => (
-          <div key={id}>{id}</div>
-        ))} */}
+        <p>lines.x:{lines[0]?.x()}</p>
+        <p>lines.y:{lines[0]?.y()}</p>
+        <p>lines[0]?.points()[0]:{lines[0]?.points()[0]}</p>
+        <p>lines[0]?.points()[1]:{lines[0]?.points()[1]}</p>
+        <p>lines[0]?.points()[2]:{lines[0]?.points()[2]}</p>
+        <p>lines[0]?.points()[3]:{lines[0]?.points()[3]}</p>
+        <p>pointerPosition.x:{pointerPosition.x}</p>
+        <p>pointerPosition.y:{pointerPosition.y}</p>
       </div>
       <div style={{ position: 'relative' }}>
         <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleStageClick}>
@@ -269,6 +248,7 @@ export default function StageComponent() {
                 onLineClick={handleClick}
                 onDragStart={handleDragStart}
                 onDragMove={handleElementDragMove}
+                onLineResize={handleLineResize}
               />
             ))}
             {dcPowerSupplies.map((dcPowerSupply) => (
